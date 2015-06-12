@@ -46,18 +46,18 @@ module Utils
     end
 
     def mytask(*args)
-        task *args do |t|
-            describe_task t
+        task *args do |t, *a|
+#            describe_task t
             puts "命令行：".blue.bold
             $dry = true
             begin
-                yield t
+                yield t, *a
             rescue => e
                 puts e
             end
             if confirm
                 $dry = false
-                yield t
+                yield t, *a
             else
                 puts "操作取消".red.bold
             end
