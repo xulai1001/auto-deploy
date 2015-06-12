@@ -1,0 +1,172 @@
+#encoding:utf-8
+
+$: << "."
+require "term/ansicolor"
+require "utils"
+
+include Utils
+
+class String
+    include Term::ANSIColor
+end
+
+class Color
+    extend Term::ANSIColor
+end
+
+class Dir
+    class << self
+        alias old_chdir chdir
+        def chdir(str=nil, &block)
+            @cdcount ||= 0
+            if block
+                @cdcount += 1
+                puts "[#{@cdcount}] 进入目录 #{str}".blue.bold
+                old_chdir str, &block
+                puts "[#{@cdcount}] 离开目录 #{str}".blue.bold
+                @cdcount -= 1
+            else
+                puts "[#{@cdcount}] 更改目录 #{str}".blue.bold
+                old_chdir str
+            end
+        end
+    end
+end
+
+Rake::TaskManager.record_task_metadata = true
+
+task default:[:all_packages]
+
+desc "自动下载所有源码"
+task all_src:[:xen, :libvmi]
+
+desc "[root]安装所有apt-get软件包"
+task all_packages:[:update_apt, :common, :xen_packages ]
+
+desc "[root]安装所有源码"
+task install_all:[:install_xen]
+
+desc "[root]更新apt-get软件源（需要手动设置好更新源）"
+mytask :update_apt do |t|
+    must_root
+    run_cmd "apt-get update"
+end
+
+desc "[root]apt-get安装基本软件"
+mytask :common do
+    must_root
+    list = <<EOL
+vim git gcc g++ default-jdk openssh-server curl build-essential firefox adobe-flashplugin vncviewer kvm 
+automake autogen flex bison libvirt-dev 
+EOL
+    run_cmd "apt-get install #{list.tr("\n", "")}"
+end
+
+desc "[root]apt-get安装xen支持软件包"
+mytask :xen_packages do
+    must_root
+    list = <<EOL
+python-dev gcc-multilib bin86 iasl bcc uuid-dev ncurses-dev libglib2.0-dev libaio-dev liblzma-dev libssl-dev libyajl-dev 
+seabios libpixman-1-dev libtool zlib1g-dev texinfo libjansson-dev libfuse-dev
+EOL
+    list.tr!("\n", "")
+    run_cmd "apt-get install #{list}"
+end
+
+desc "下载编译Xen"
+mytask :xen do
+    must_not_root
+    version = "4.5.0"
+    pkgname = "xen-#{version}.tar.gz"
+    config = <<EOL
+--disable-blktap1 --disable-qemu-traditional --disable-rombios --with-system-seabios=/usr/share/seabios/bios-256k.bin 
+--with-extra-qemu-configure-args="--enable-spice --enable-usb-redir"
+EOL
+    config.tr!("\n", "")
+    
+    Dir.mkdir "download" if !FileTest.exist? "download"
+    Dir.mkdir "xen" if !FileTest.exist? "xen"
+
+    Dir.chdir "download" do
+        if !FileTest.exists? pkgname
+            puts "下载Xen源码...".green.bold
+            run_cmd "wget -c http://bits.xensource.com/oss-xen/release/#{version}/#{pkgname}"
+        end
+        # verify
+        puts "验证xen源码".green.bold
+        ret = run_cmd "wget -c http://bits.xensource.com/oss-xen/release/#{version}/#{pkgname}.sig",
+                      "gpg --keyserver pgp.mit.edu --recv-keys 57e82bd9",
+                      "gpg --verify #{pkgname}.sig #{pkgname}"
+        if ret==false
+            puts "验证错误，重新下载xen源码".red.bold
+            run_cmd "wget -c http://bits.xensource.com/oss-xen/release/#{version}/#{pkgname}"
+        end
+    end
+
+    Dir.chdir "xen" do
+        puts "验证通过，解压...".green.bold
+        run_cmd "tar xzf ../download/#{pkgname}"
+
+        Dir.chdir "xen-#{version}" do
+            puts "编译xen...".green.bold
+            run_cmd "./configure #{config}",
+                    "make -j8 xen",
+                    "make -j8 tools",
+                    "make -j8 stubdom"
+        end
+    end
+end
+
+desc "[root]安装xen"
+mytask :install_xen do
+    must_root
+    version = "4.5.0"
+    short_version = "4.5"
+    
+    Dir.chdir "xen/xen-#{version}" do
+        run_cmd "make install"
+    end
+    
+    Dir.chdir "/boot" do
+        run_cmd "rm xen.gz xen-4.gz xen-#{short_version}.gz"
+        Dir.chdir "grub" do
+            run_cmd "grub-mkconfig -o grub.cfg"
+            puts "开启gedit，手动修改grub.cfg...".green.bold
+            run_cmd "gedit grub.cfg"
+            puts "添加运行库引用...".green.bold
+            run_cmd "ldconfig"
+        end        
+    end
+    
+    Dir.chdir "/etc" do
+        puts "设置xencommons启动项".green.bold
+        cmd = "service xencommons start"
+
+        rc = File.read "rc.local"
+        rc.gsub! cmd, ""
+        rc.gsub!(/^exit 0/){cmd + "\nexit 0" }
+        File.open "rc.local", "w" do |f|
+            f.write rc
+        end        
+    end
+    puts "Xen安装完成，需要重新启动......".green.bold
+
+    # todo: 加入网络设置脚本
+end
+
+desc "下载编译libvmi"
+mytask :libvmi do
+    must_not_root
+    Dir.chdir "xen" do
+        if !FileTest.exist? "libvmi"
+            run_cmd "git clone https://github.com/libvmi/libvmi"
+        end
+        Dir.chdir "libvmi" do
+            run_cmd "git pull",
+                    "./autogen.sh",
+                    "./configure --enable-xen-events --enable-shm-snapshot --disable-kvm",
+                    "make"
+        end
+    end
+end
+
