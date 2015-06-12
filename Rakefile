@@ -16,7 +16,7 @@ $app_list = ObjectSpace.each_object(Class).select {|klass| klass < MyTask }
 def tag(x); x.to_s.downcase.to_sym; end
 
 def help_text
-    (["可部署的应用："] + $app_list +
+    (["可部署的应用："] + $app_list.map{|x|tag(x)} +
      ["动作："] + $target_list + 
      ["例子：rake xen:all, rake common:apt, rake common"] + 
      ["      rake all:xen, rake source:xen, rake all"]).join("\n")

@@ -3,6 +3,7 @@ $: << "." << "./rake"
 $:.uniq!
 
 require "utils"
+include Utils
 
 # 定义基本操作类型
 class MyTask
@@ -18,11 +19,13 @@ class MyTask
     
     # 下载源码，放在src文件夹中
     def source
+        Utils.must_not_root
         puts "下载#{self.class}的源码...".green.bold
     end
     
     # 配置源码并编译
     def compile
+        Utils.must_not_root
         puts "配置并编译#{self.class}...".green.bold
     end
     

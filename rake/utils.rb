@@ -44,12 +44,12 @@ module Utils
         username == "root"
     end
     
-#    def must_root
-#        if !root?
-#            raise "操作需要root权限，请使用sudo rake".red.bold
-#        end
-#    end
-#
+    def must_root
+        if !root?
+            raise "操作需要root权限，请使用sudo rake".red.bold
+        end
+    end
+
     def must_not_root
         raise "操作无法在root用户下执行，请使用sudo".red.bold if logname == "root"
         true
@@ -68,7 +68,7 @@ module Utils
     def cmd(*args)
         ret = nil
         args.each do |c|
-            c.chomp!
+            c.tr! "\n", ""
             if root?
                 cmdline = "sudo -c '" + c + "' - #{logname}"
                 puts cmdline.blue.bold
@@ -77,7 +77,7 @@ module Utils
                 puts c.blue.bold
                 ret = system c if !$dry
             end
-            break if ret
+#            break if ret
         end
         ret
     end
@@ -86,7 +86,7 @@ module Utils
     def cmdsu(*args)
         ret = nil
         args.each do |c|
-            c.chomp!
+            c.tr! "\n", ""
             if root?
                 puts c.blue.bold
                 ret = system c if !$dry
@@ -95,7 +95,7 @@ module Utils
                 puts "[需要系统权限] #{cmdline}".blue.bold
                 ret = system cmdline if !$dry
             end
-            break if ret
+#            break if ret
         end
         ret
     end
@@ -114,11 +114,11 @@ module Utils
 #            describe_task t
             puts "命令行：".blue.bold
             $dry = true
-#            begin
+            begin
                 yield t, *a
-#            rescue => e
-#                puts e
-#            end
+            rescue => e
+                puts e
+            end
             if confirm
                 $dry = false
                 yield t, *a
