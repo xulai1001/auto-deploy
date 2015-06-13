@@ -13,7 +13,7 @@ EOL
     V   = VER[/\d+/]
     PKGNAME = "xen-#{VER}"
     CONFIG = <<EOL
---disable-blktap1 --disable-qemu-traditional --disable-rombios --with-system-seabios=/usr/share/seabios/bios-256k.bin --with-extra-qemu-configure-args="--enable-spice --enable-usb-redir
+--disable-blktap1 --disable-qemu-traditional --disable-rombios --with-system-seabios=/usr/share/seabios/bios-256k.bin --with-extra-qemu-configure-args="--enable-spice --enable-usb-redir"
 EOL
 
     # 下载源码，放在src文件夹中

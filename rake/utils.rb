@@ -70,7 +70,8 @@ module Utils
         args.each do |c|
             c.tr! "\n", ""
             if root?
-                cmdline = "su -c '" + c + "' - #{logname}"
+#                cmdline = "su -c '" + c + "' - #{logname}"
+                cmdline = "su -c '" + c + "' #{logname}"
                 puts cmdline.blue.bold
                 ret = system cmdline if !$dry
             else
