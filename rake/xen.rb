@@ -9,8 +9,8 @@ class Xen < MyTask
 python-dev gcc-multilib bin86 iasl bcc uuid-dev ncurses-dev libglib2.0-dev libaio-dev liblzma-dev libssl-dev libyajl-dev seabios libpixman-1-dev libtool zlib1g-dev texinfo
 EOL
     VER = "4.5.0"
-    VE  = "4.5"
-    V   = "4"
+    VE  = VER[/\d+\.\d+/]
+    V   = VER[/\d+/]
     PKGNAME = "xen-#{VER}"
     CONFIG = <<EOL
 --disable-blktap1 --disable-qemu-traditional --disable-rombios --with-system-seabios=/usr/share/seabios/bios-256k.bin --with-extra-qemu-configure-args="--enable-spice --enable-usb-redir
@@ -25,9 +25,9 @@ EOL
             end
             # verify
             puts "验证xen源码".green.bold
-            ret = cmd "wget -c http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.sig",
+            ret = cmd "wget -c http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
                       "gpg --keyserver pgp.mit.edu --recv-keys 57e82bd9",
-                      "gpg --verify #{PKGNAME}.sig #{PKGNAME}"
+                      "gpg --verify #{PKGNAME}.tar.gz.sig #{PKGNAME}.tar.gz"
             # FIXME: ????
             if ret==false
                 puts "验证错误，重新下载xen源码".red.bold
