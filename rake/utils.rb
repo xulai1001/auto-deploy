@@ -101,6 +101,39 @@ module Utils
         ret
     end
 
+	 def exists?(fname)
+		FileTest.exists? fname
+    end
+
+	 def download(url)
+      fname = url[/\/[^\/]*$/][1..-1]
+		puts "downloading #{url} -> #{fname}".green.bold
+
+		cmd "wget -c #{url}"
+    end
+
+	 def verify(keyserver, key, sigfile, filename)
+		puts "verify #{filename}".green.bold
+
+		cmd "gpg --keyserver #{keyserver} --recv-keys #{key}"
+      cmd "gpg --verify #{sigfile} #{filename}"
+    end
+
+    def download_and_verify(url, sig_url, keyserver, key)
+      fname = url[/\/[^\/]*$/][1..-1]
+      signame = sig_url[/\/[^\/]*$/][1..-1]
+
+		download(url) if !exists?(fname)
+		download(sig_url) if !exists?(signame)
+		return verify(keyserver, key, signame, fname)
+	 end
+
+    def unpack(filename, mode="xzf")
+		puts "unpacking #{filename}...".green.bold
+
+		cmd "tar #{mode} #{filename}"
+    end
+
     def describe_task(tsk)
         puts ("-- " + (tsk.comment || "") + " --").green.bold
     end

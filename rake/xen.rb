@@ -20,19 +20,16 @@ EOL
     def source
         super
         Dir.chdir "packages" do
-            if !FileTest.exists? "#{PKGNAME}.tar.gz"
-                cmd "wget -c http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz"
-            end
-            # verify
-            puts "验证xen源码".green.bold
-            ret = cmd "wget -c http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
-                      "gpg --keyserver pgp.mit.edu --recv-keys 57e82bd9",
-                      "gpg --verify #{PKGNAME}.tar.gz.sig #{PKGNAME}.tar.gz"
-            # FIXME: ????
-            if ret==false
+				ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
+ 							   				  "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
+								        		  "pgp.mit.edu", "57e82bd9"
+            if !ret
                 puts "验证错误，重新下载xen源码".red.bold
-                cmd "wget -c http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz"
-            end
+					 File.delete "#{PKGNAME}.tar.gz"
+					 ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
+ 							   				  "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
+								        		  "pgp.mit.edu", "57e82bd9"
+				end
         end
     end
     
@@ -40,8 +37,7 @@ EOL
     def compile
         super
         Dir.chdir "src" do
-            puts "解压...".green.bold
-            cmd "tar xzf ../packages/#{PKGNAME}.tar.gz"
+            unpack "../packages/#{PKGNAME}.tar.gz"
 
             Dir.chdir PKGNAME do
                 puts "编译xen...".green.bold
