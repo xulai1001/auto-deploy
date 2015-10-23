@@ -20,16 +20,16 @@ EOL
     def source
         super
         Dir.chdir "packages" do
-				ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
- 							   				  "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
-								        		  "pgp.mit.edu", "57e82bd9"
+            ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
+                        "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
+                        :verify, "pgp.mit.edu", "57e82bd9"
             if !ret
                 puts "验证错误，重新下载xen源码".red.bold
-					 File.delete "#{PKGNAME}.tar.gz"
-					 ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
- 							   				  "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
-								        		  "pgp.mit.edu", "57e82bd9"
-				end
+                File.delete "#{PKGNAME}.tar.gz"
+                ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
+                                        "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
+                                        :verify, "pgp.mit.edu", "57e82bd9"
+     		    end
         end
     end
     

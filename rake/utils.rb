@@ -28,6 +28,8 @@ class Dir
     end
 end
 
+$cmdsu = false
+
 module Utils
 
     module_function
@@ -66,21 +68,25 @@ module Utils
 
     # unprivileged cmd
     def cmd(*args)
-        ret = nil
-        args.each do |c|
-            c.tr! "\n", ""
-            if root?
-#                cmdline = "su -c '" + c + "' - #{logname}"
-                cmdline = "su -c '" + c + "' #{logname}"
-                puts cmdline.blue.bold
-                ret = system cmdline if !$dry
-            else
-                puts c.blue.bold
-                ret = system c if !$dry
+        if $cmdsu
+            return cmdsu(*args)
+        else
+            ret = nil
+            args.each do |c|
+                c.tr! "\n", ""
+                if root?
+    #                cmdline = "su -c '" + c + "' - #{logname}"
+                    cmdline = "su -c '" + c + "' #{logname}"
+                    puts cmdline.blue.bold
+                    ret = system cmdline if !$dry
+                else
+                    puts c.blue.bold
+                    ret = system c if !$dry
+                end
+    #            break if ret
             end
-#            break if ret
+            ret
         end
-        ret
     end
     
     # privileged cmd
@@ -101,6 +107,12 @@ module Utils
         ret
     end
 
+    def with_cmdsu
+        $cmdsu = true
+        yield
+        $cmdsu = false
+    end
+
 	 def exists?(fname)
 		FileTest.exists? fname
     end
@@ -112,20 +124,25 @@ module Utils
 		cmd "wget -c #{url}"
     end
 
-	 def verify(keyserver, key, sigfile, filename)
-		puts "verify #{filename}".green.bold
+	 def verify(filename, sigfile, keyserver, key)
+    		puts "verify #{filename}".green.bold
 
-		cmd "gpg --keyserver #{keyserver} --recv-keys #{key}"
+    		cmd "gpg --keyserver #{keyserver} --recv-keys #{key}"
       cmd "gpg --verify #{sigfile} #{filename}"
     end
 
-    def download_and_verify(url, sig_url, keyserver, key)
+    def sha1(filename, sigfile)
+        puts "verify #{filename}".green.bold
+        cmd "sha1sum -c #{sigfile}"
+    end
+
+    def download_and_verify(url, sig_url, sym, *args)
       fname = url[/\/[^\/]*$/][1..-1]
       signame = sig_url[/\/[^\/]*$/][1..-1]
 
-		download(url) if !exists?(fname)
-		download(sig_url) if !exists?(signame)
-		return verify(keyserver, key, signame, fname)
+    		download(url) if !exists?(fname)
+    		download(sig_url) if !exists?(signame)
+    		return send(sym, fname, signame, *args)
 	 end
 
     def unpack(filename, mode="xzf")
