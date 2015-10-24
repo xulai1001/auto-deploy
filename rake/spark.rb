@@ -14,9 +14,7 @@ class Spark < MyTask
     def source
         super
         Dir.chdir "packages" do
-            download_and_verify "http://apache.dataguru.cn/spark/spark-#{VER}/#{PKGNAME}",
-                                "http://apache.dataguru.cn/spark/spark-#{VER}/#{PKGNAME}.sha",
-                                :sha1
+            download "http://apache.dataguru.cn/spark/spark-#{VER}/#{PKGNAME}"
         end
     end
     

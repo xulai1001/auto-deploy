@@ -18,7 +18,7 @@ class Ambari < MyTask
     end
 
     def start
-        cmd "ambari-server setup"
+        cmdsu "ambari-server setup"
         cmd "ambari-server start"
     end
 

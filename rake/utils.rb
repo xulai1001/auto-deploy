@@ -17,12 +17,16 @@ class Dir
             if block
                 @cdcount += 1
                 puts "[#{@cdcount}] 进入目录 #{str}".blue.bold
-                old_chdir str, &block
+                if !$dry
+                    old_chdir str, &block
+                else
+                    yield block
+                end
                 puts "[#{@cdcount}] 离开目录 #{str}".blue.bold
                 @cdcount -= 1
             else
                 puts "[#{@cdcount}] 更改目录 #{str}".blue.bold
-                old_chdir str
+                old_chdir str if !$dry
             end
         end
     end
@@ -56,22 +60,12 @@ module Utils
         raise "操作无法在root用户下执行，请使用sudo".red.bold if logname == "root"
         true
     end
-#
-#    def run_cmd(*cmd)
-#        ret = nil
-#        cmd.each do |c|
-#            puts c.blue.bold
-#            ret = system c if !$dry
-#        end
-#        ret
-#    end
 
     # unprivileged cmd
     def cmd(*args)
         if $cmdsu
             return cmdsu(*args)
         else
-            ret = nil
             args.each do |c|
                 c.tr! "\n", ""
                 if root?
@@ -81,30 +75,31 @@ module Utils
                     ret = system cmdline if !$dry
                 else
                     puts c.blue.bold
-                    ret = system c if !$dry
+                    if !$dry
+                        system c
+                        raise "#{cmdline} -> #{$?}".red.bold if !$?.success?
+                    end
                 end
-    #            break if ret
             end
-            ret
         end
     end
     
     # privileged cmd
     def cmdsu(*args)
-        ret = nil
         args.each do |c|
             c.tr! "\n", ""
             if root?
                 puts c.blue.bold
-                ret = system c if !$dry
+                system c if !$dry
             else
                 cmdline = "sudo " + c
                 puts "[需要系统权限] #{cmdline}".blue.bold
-                ret = system cmdline if !$dry
+                if !$dry
+                    system cmdline
+                    raise "#{cmdline} -> #{$?}".red.bold if !$?.success?
+                end
             end
-#            break if ret
         end
-        ret
     end
 
     def with_cmdsu

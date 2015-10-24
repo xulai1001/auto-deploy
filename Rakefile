@@ -8,7 +8,7 @@ include Utils
 Rake::TaskManager.record_task_metadata = true
 
 # find all methods of MyTask ( _dump is no use) as target list
-$target_list = MyTask.instance.methods - MyTask.methods - [:_dump]
+$target_list = MyTask.instance.methods - MyTask.methods - [:_dump, :help]
 
 # find all subclasses of MyTask as supported apps
 $app_list = ObjectSpace.each_object(Class).select {|klass| klass < MyTask }
@@ -26,11 +26,16 @@ end
 # example: rake xen:all, rake common:apt, rake common
 $app_list.each do |k|
     namespace tag(k) do
-        targets = k.instance.methods - k.methods - [:_dump]
+        targets = k.instance.methods - k.methods - [:_dump, :help]
         targets.each do |m|
             mytask tag(m) do
                 k.instance.send m
             end
+        end
+        task :help do
+            $dry = true
+            k.instance.help
+            $dry = false
         end
     end
     mytask tag(k) do
@@ -48,10 +53,19 @@ $target_list.each do |m|
             end
         end
     end
-    
     mytask tag(m) do
         $app_list.each do |k|
             k.instance.send m
+        end
+    end
+end
+
+namespace :help do
+    $app_list.each do |k|
+        task tag(k) do
+            $dry = true
+            k.instance.help
+            $dry = false
         end
     end
 end
