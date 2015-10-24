@@ -75,7 +75,7 @@ EOL
             rc = File.read "rc.local"
             rc.gsub! cmdline, ""
             rc.gsub!(/^exit 0/){cmdline + "\nexit 0" }
-            File.open "rc.local", "w" do |f|
+            File.open "rc.local", "w+" do |f|
                 f.write rc
             end        
         end
