@@ -8,8 +8,8 @@ require "utils"
 class Common < MyTask
 
     PACKAGES = <<EOL
-vim git gcc g++ default-jdk openssh-server curl build-essential firefox adobe-flashplugin vncviewer kvm 
-automake autogen flex bison libvirt-dev
+vim git gcc g++ default-jdk openssh-server curl build-essential firefox vncviewer kvm 
+automake autogen flex bison libvirt-dev python-dev r-base r-base-dev nodejs npm php5-fpm emacs
 EOL
     
 end
