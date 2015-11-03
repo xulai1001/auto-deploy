@@ -6,14 +6,14 @@ require "mytask"
 # 定义基本操作类型
 class Ambari < MyTask
     
-    PACKAGES = "ambari-server";
+    PACKAGES = "ambari-server ambari-agent ntp";
     RELEASE = "ubuntu14";
 
     def add_repo
         Dir.chdir "/etc/apt/sources.list.d" do
            with_cmdsu { download "http://public-repo-1.hortonworks.com/ambari/#{RELEASE}/2.x/updates/2.1.2/ambari.list" }
         end
-        cmdsu "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A05313CAD"
+        cmdsu "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A07513CAD"
         cmdsu "apt-get update"
     end
 
