@@ -6,7 +6,7 @@ require "mytask"
 # 定义基本操作类型
 class Ambari < MyTask
     
-    PACKAGES = "ambari-server ambari-agent ntp";
+    PACKAGES = "ambari-agent ntp";
     RELEASE = "ubuntu14";
 
     def add_repo
@@ -15,6 +15,10 @@ class Ambari < MyTask
         end
         cmdsu "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A07513CAD"
         cmdsu "apt-get update"
+    end
+
+    def server
+      cmdsu "apt-get install ambari-server"
     end
 
     def start
