@@ -19,16 +19,19 @@ class Ambari < MyTask
 
     def server
       cmdsu "apt-get install ambari-server"
+      start
     end
 
     def start
+        puts "JAVA_HOME is #{`echo $JAVA_HOME`}".green.bold
+        puts "listing java path..."
+        cmd "ls -l /etc/alternatives/java"
         cmdsu "ambari-server setup"
-        cmd "ambari-server start"
     end
 
     def all
         add_repo
         super
-        start
+        cmdsu "nano /etc/ambari-agent/conf/ambari-agent.ini"
     end
 end
