@@ -1,0 +1,52 @@
+使用autodeploy之前要配置的
+-------------------------
+1. 修改软件源：
+wget http://lug.ustc.edu.cn/wiki/_export/code/mirrors/help/fedora?codeblock=0 -O fedora.repo
+sudo rm /etc/yum.repos.d/*
+sudo cp fedora.repo /etc/yum.repos.d/fedora.repo
+sudo dnf makecache
+
+2. 安装开发工具
+sudo dnf install '@Development Tools'
+
+3. 配置rubygems/python
+gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
+gem sources -l
+sudo pip install --upgrade pip
+
+4. 配置autodeploy
+git clone https://github.com/xulai1001/auto-deploy 
+gem install require_all term-ansicolor
+
+以下计划用autodeploy
+5. 安装软件
+sudo dnf install vim vnc automake flex bison python-devel R nodejs npm php-fpm emacs gparted cmake
+比起ubuntu有很多软件已经安装好了。
+
+6. 安装更新
+sudo dnf update
+
+7. vim配置(豪华版...一般般
+git clone https://github.com/spf13/spf13-vim
+./bootstrap.sh
+
+7. vim配置(简单版:)
+set ai
+set ts=4
+set sts=4
+set expandtab
+set number
+
+8. shell配置（简单版
+echo export PS1=\"\\n\${PS1}\" | tee -a .bashrc
+
+8. shell配置（豪华版 还不错
+sudo dnf install zsh
+chsh -s /bin/zsh
+重新登陆
+sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+sudo pip install powerline-status
+调整主题为agnoster
+字体选meslo lg s dz regular/10...
+
+
