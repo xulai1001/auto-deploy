@@ -1,6 +1,8 @@
 # auto-deploy
 rake auto deploy scripts for lab environments.
 
-init.sh - apt-get install ruby/rake, gem install prereqs
+May 5 - update bootstrap script. now can
 
-rake - gl hf!
+bash <(curl https://raw.githubusercontent.com/xulai1001/auto-deploy/master1/bootstrap/bootstrap.sh -L)
+
+and hf!
