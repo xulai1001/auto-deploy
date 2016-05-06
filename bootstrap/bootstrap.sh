@@ -44,6 +44,8 @@ confirm_and_run()
 # unit test
 check_bootstrap()
 {
+    # find stdin
+    exec 3<`tty`
     echo "* bootstrap 已经载入."
     return 0
 }
