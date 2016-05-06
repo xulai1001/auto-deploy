@@ -1,4 +1,6 @@
 #!/bin/bash
+# find stdin
+exec 3<`tty`
 
 wget_args="-t0 --retry-connrefused -w3"
 raw_url=https://raw.githubusercontent.com/xulai1001/auto-deploy/master1
@@ -12,7 +14,7 @@ to_lower()
 confirm()
 {
     echo "确认执行:" $*
-    read -n1 -p "回车:执行，N/A/Ctrl-C:取消，S-跳过" ch
+    read -u3 -n1 -p "回车:执行，N/A/Ctrl-C:取消，S-跳过" ch
     echo
     ch=$(to_lower $ch)
 
