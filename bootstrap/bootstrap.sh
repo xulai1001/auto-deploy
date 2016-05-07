@@ -1,6 +1,6 @@
 #!/bin/bash
 # find stdin
-exec 3<`tty`
+exec 3<&1
 
 wget_args="-t0 --retry-connrefused -w3"
 raw_url=https://raw.githubusercontent.com/xulai1001/auto-deploy/master1
@@ -44,8 +44,8 @@ confirm_and_run()
 # unit test
 check_bootstrap()
 {
-    # find stdin
-    exec 3<`tty`
+    # set stdin same to stdout (pts)
+    exec 3<&1
     echo "* bootstrap 已经载入."
     return 0
 }
