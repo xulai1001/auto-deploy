@@ -10,22 +10,24 @@ class Color
 end
 
 class Dir
+    @@cdstack = [`pwd`]
+    
     class << self
         alias old_chdir chdir
         def chdir(str=nil, &block)
-            @cdcount ||= 0
             if block
-                @cdcount += 1
-                puts "[#{@cdcount}] 进入目录 #{str}".blue.bold
+                @@cdstack.push str
+                puts "[#{@@cdstack.size}] 进入目录 #{str}".blue.bold
                 if !$dry
                     old_chdir str, &block
                 else
                     yield block
                 end
-                puts "[#{@cdcount}] 离开目录 #{str}".blue.bold
-                @cdcount -= 1
+                puts "[#{@@cdstack.size}] 离开目录 #{str}".blue.bold
+                @@cdstack.pop
             else
-                puts "[#{@cdcount}] 更改目录 #{str}".blue.bold
+                puts "[#{@@cdstack.size}] 更改目录 #{str}".blue.bold
+                @@cdstack[-1] = str
                 old_chdir str if !$dry
             end
         end
@@ -52,12 +54,17 @@ module Utils
     
     def must_root
         if !root?
-            raise "操作需要root权限，请使用sudo rake".red.bold
+            puts "操作需要root权限，请使用sudo rake".red.bold
+            raise if not $dry
         end
+        true
     end
 
     def must_not_root
-        raise "操作无法在root用户下执行，请使用sudo".red.bold if logname == "root"
+        if logname == "root"
+            puts "操作无法在root用户(su)下执行，请使用sudo".red.bold
+            raise if not $dry
+        end
         true
     end
 
@@ -108,69 +115,88 @@ module Utils
         $cmdsu = false
     end
 
-	 def exists?(fname)
-		FileTest.exists? fname
+    def exists?(fname)
+        ret = FileTest.exists? fname
+        p "文件 #{fname} 已存在." if ret
+        ret
     end
+    
+    def local_fname(url); return url[/\/[^\/]*$/][1..-1]; end
 
-	 def download(url)
-      fname = url[/\/[^\/]*$/][1..-1]
-		puts "downloading #{url} -> #{fname}".green.bold
-
+    # actions
+    def download(url)
+		puts "下载 #{url} -> #{local_fname(url)}".green.bold
 		cmd "wget -c #{url}"
     end
 
-	 def verify(filename, sigfile, keyserver, key)
-    		puts "verify #{filename}".green.bold
-
-    		cmd "gpg --keyserver #{keyserver} --recv-keys #{key}"
-      cmd "gpg --verify #{sigfile} #{filename}"
+    def verify(filename, sigfile, **kwargs)
+        puts "验证 #{filename} (#{kwargs[:method]})".green.bold
+        case kwargs[:method].to_sym
+            when :gpg   # args: method=>:gpg, keyserver, key
+                cmd "gpg --keyserver #{kwargs[:keyserver]} --recv-keys #{kwargs[:key]}"
+                cmd "gpg --verify #{sigfile} #{filename}"
+            when :sha1  # args: method=>:sha1
+                cmd "sha1sum -c #{sigfile}"
+        end
     end
 
-    def sha1(filename, sigfile)
-        puts "verify #{filename}".green.bold
-        cmd "sha1sum -c #{sigfile}"
-    end
+    # if no need to verify, use download directly.
+    def download_and_verify(url, sig_url, **kwargs)
+        fname = local_fname(url)
+        signame = local_fname(sig_url)
 
-    def download_and_verify(url, sig_url, sym, *args)
-      fname = url[/\/[^\/]*$/][1..-1]
-      signame = sig_url[/\/[^\/]*$/][1..-1]
-
-    		download(url) if !exists?(fname)
-    		download(sig_url) if !exists?(signame)
-    		return send(sym, fname, signame, *args)
+        download(url) if !exists?(fname)        
+        download(sig_url) if !exists?(signame)
+        verify fname, signame, **kwargs
 	 end
 
     def unpack(filename, mode="xzf")
-		puts "unpacking #{filename}...".green.bold
+		puts "解压 #{filename}...".green.bold
 
 		cmd "tar #{mode} #{filename}"
     end
 
+    # confirm
     def describe_task(tsk)
         puts ("-- " + (tsk.comment || "") + " --").green.bold
     end
-
-    def confirm
-        STDOUT.write "输入任意键执行，N/Q - 取消："; s = STDIN.gets.chomp
-        return !(["N", "Q"].include?(s.upcase))
+    
+    def dry_run(*args)
+        $dry = true
+        yield *args
+        $dry = false
     end
+    
+    def confirm
+        STDOUT.write "输入任意键执行，S - 跳过本步骤, N/X - 中止操作："; s = STDIN.gets.chomp
+        case s.downcase
+            when "s"
+                return "skip"
+            when "x", "n"
+                return "cancel"
+            else return true
+        end
+    end
+    
+    def confirm_and_run(*args, &block)
+        dry_run *args, &block
+        case confirm
+            when true   # run
+                return block.call t, *a
+            when "skip"
+                puts "跳过本步骤.".yellow.bold
+                return "skip"
+            when "cancel"
+                puts "操作取消".red.bold
+                return "cancel"
+        end
+    end        
 
-    def mytask(*args)
+    def mytask(*args, &block)
         task *args do |t, *a|
 #            describe_task t
             puts "命令行：".blue.bold
-            $dry = true
-            begin
-                yield t, *a
-            rescue => e
-                puts e
-            end
-            if confirm
-                $dry = false
-                yield t, *a
-            else
-                puts "操作取消".red.bold
-            end
+            confirm_and_run t, *a, &block
         end
     end
         

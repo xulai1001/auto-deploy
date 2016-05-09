@@ -19,17 +19,19 @@ EOL
     # 下载源码，放在src文件夹中
     def source
         super
+        pname = "#{PKGNAME}.tar.gz"
+        
         Dir.chdir "packages" do
+        begin
             ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
-                        "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
-                        :verify, "pgp.mit.edu", "57e82bd9"
-            if !ret
-                puts "验证错误，重新下载xen源码".red.bold
-                File.delete "#{PKGNAME}.tar.gz"
-                ret = download_and_verify "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz",
-                                        "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
-                                        :verify, "pgp.mit.edu", "57e82bd9"
-     		    end
+                        			  "http://bits.xensource.com/oss-xen/release/#{VER}/#{PKGNAME}.tar.gz.sig",
+                        			  method:"gpg", keyserver:"pgp.mit.edu", key:"57e82bd9"
+            raise RuntimeError if not ret and not $dry
+        rescue RuntimeError
+            puts "验证错误，重新下载xen源码".red.bold
+            File.delete pname if FileTest.exists? pname
+            retry
+        end
         end
     end
     
@@ -71,13 +73,15 @@ EOL
         Dir.chdir "/etc" do
             puts "设置xencommons启动项".green.bold
             cmdline = "service xencommons start"
-
-            rc = File.read "rc.local"
-            rc.gsub! cmdline, ""
-            rc.gsub!(/^exit 0/){cmdline + "\nexit 0" }
-            File.open "rc.local", "w+" do |f|
-                f.write rc
-            end        
+            begin
+		        rc = File.read "rc.local"
+		        rc.gsub! cmdline, ""
+		        rc.gsub!(/^exit 0/){cmdline + "\nexit 0" }
+		        File.open "rc.local", "w+" do |f|
+		            f.write rc
+		        end  
+		    rescue
+		    end      
         end
         puts "Xen安装完成，需要重新启动......".green.bold
 

@@ -10,7 +10,9 @@ class MyTask
     include Singleton
     # apt-get 下载依赖软件包，需要管理权限
     
-    PACKAGES = "";
+    PACKAGES = ""
+    ALL = [:apt, :source, :compile, :install]
+
     def apt
         puts "apt-get安装#{self.class}的依赖包...".green
         Utils.cmdsu "apt-get install #{self.class::PACKAGES}"
@@ -25,7 +27,6 @@ class MyTask
     
     # 配置源码并编译
     def compile
-        Utils.must_not_root
         puts "配置并编译#{self.class}...".green
     end
     
@@ -44,9 +45,10 @@ class MyTask
     
     # 进行所有操作
     def all
-        apt
-        source
-        compile
-        install
+        if $dry or (not ["true", "1"].include? ENV["step"])
+            self.class::ALL.each {|op| self.send op }                
+        else
+            self.class::ALL.each {|op| Utils.confirm_and_run { self.send op } }
+        end
     end
 end

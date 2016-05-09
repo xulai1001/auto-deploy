@@ -63,9 +63,7 @@ end
 namespace :help do
     $app_list.each do |k|
         task tag(k) do
-            $dry = true
-            k.instance.help
-            $dry = false
+	    Utils.dry_run { k.instance.help }
         end
     end
 end
