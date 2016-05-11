@@ -18,9 +18,10 @@ set_repo()
 set_ruby()
 {
     # use rvm to install from ruby.taobao.org
-    gem sources --add https://ruby.taobao.org/ --remove http://rubygems.org/
-    gem sources -l
-    gem install require_all term-ansicolor
+    # fixme: need sudo or not?
+    sudo gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
+    sudo gem sources -l
+    sudo gem install require_all term-ansicolor
 
     # just also put python init here.
     sudo pip install --upgrade pip
@@ -45,7 +46,7 @@ echo "更新系统"
 confirm_and_run sudo dnf update
 
 confirm "设置ruby软件源"
-if [ $? -eq 0 ]; then set-ruby; fi
+if [ $? -eq 0 ]; then set_ruby; fi
 
 confirm "下载auto-deploy..."
 if [ $? -eq 0 ]; then download; fi

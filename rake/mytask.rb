@@ -11,13 +11,20 @@ class MyTask
     # apt-get 下载依赖软件包，需要管理权限
     
     PACKAGES = ""
-    ALL = [:apt, :source, :compile, :install]
+    FEDORA_PACKAGES = ""
+    ALL = [:package, :source, :compile, :install]
 
-    def apt
-        puts "apt-get安装#{self.class}的依赖包...".green
-        Utils.cmdsu "apt-get install #{self.class::PACKAGES}"
+    def package
+        installer = "apt-get"
+        pkg = self.class::PACKAGES
+        if Utils.distro_info["id"] == "fedora"
+            # currently fedora only, others debian
+            installer = "dnf"
+            pkg = self.class::FEDORA_PACKAGES
+        end
+        puts "安装#{self.class}的依赖包...".green
+        Utils.cmdsu "#{installer} install #{pkg}"
     end
-    alias package apt
     
     # 下载源码，放在src文件夹中
     def source

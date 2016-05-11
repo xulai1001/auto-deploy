@@ -8,7 +8,7 @@ class Xen < MyTask
     PACKAGES = <<EOL
 python-dev gcc-multilib bin86 iasl bcc uuid-dev ncurses-dev libglib2.0-dev libaio-dev liblzma-dev libssl-dev libyajl-dev seabios libpixman-1-dev libtool zlib1g-dev texinfo
 EOL
-    VER = "4.5.0"
+    VER = "4.6.1"
     VE  = VER[/\d+\.\d+/]
     V   = VER[/\d+/]
     PKGNAME = "xen-#{VER}"
