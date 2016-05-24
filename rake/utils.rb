@@ -71,6 +71,14 @@ module Utils
         true
     end
 
+    def pass_if_dry
+        if $dry
+            puts "模拟执行中,跳过部分操作."
+        else
+            yield
+        end
+    end
+
 #----------------------------------
 # invoke shell commands
 
@@ -114,6 +122,10 @@ module Utils
             end
         end
     end
+    
+    # quick access
+    alias c cmd
+    alias cs cmdsu
 
     def with_cmdsu
         $cmdsu = true
@@ -131,6 +143,37 @@ module Utils
     end
     
     def local_fname(url); return url[/\/[^\/]*$/][1..-1]; end
+    
+    # insert text before/after first matched line
+    # search by lines
+    def insert_config(fname, tag=:before, pattern="", text="")
+        text = yield if block_given?
+        lines = File.read(fname).lines
+        id = lines.index {|l| l[pattern]}
+        if id
+            if tag == :before
+                lines.insert(id, text)
+            elsif tag == :after
+                lines.insert(1+id, text)
+            end
+            File.open fname, "w" do |f|
+                lines.each do |l|
+                    f.puts l.chomp
+                end
+            end
+        else
+            puts "在文件 #{fname} 中未找到指定模式: #{pattern}".red.bold
+            puts "是否要手动编辑?"
+            confirm_and_run { c "gedit #{fname}" }
+        end
+    end
+    
+    def append_config(fname, text)
+        text = yield if block_given?
+        File.open fname, "a" do |f|
+            f.puts text.chomp
+        end
+    end
 
 #----------------------------------
 # os distro detection
@@ -142,7 +185,13 @@ module Utils
         }.to_h
         @distro_info
     end
-#   puts distro_info
+    # puts distro_info
+
+    @distro_module = {}
+    def distro_module(mod); @distro_module[mod::ID] = mod; end
+    
+    # get current distro
+    def distro; @distro_module[distro_info["id"]]; end
 
 #----------------------------------
 # confirm helper
@@ -188,17 +237,17 @@ module Utils
 
     def download(url)
 		puts "下载 #{url} -> #{local_fname(url)}".green.bold
-		cmd "wget -c #{url}"
+		c "wget -c #{url}"
     end
 
     def verify(filename, sigfile, **kwargs)
         puts "验证 #{filename} (#{kwargs[:method]})".green.bold
         case kwargs[:method].to_sym
             when :gpg   # args: method=>:gpg, keyserver, key
-                cmd "gpg --keyserver #{kwargs[:keyserver]} --recv-keys #{kwargs[:key]}"
-                cmd "gpg --verify #{sigfile} #{filename}"
+                c "gpg --keyserver #{kwargs[:keyserver]} --recv-keys #{kwargs[:key]}"
+                c "gpg --verify #{sigfile} #{filename}"
             when :sha1  # args: method=>:sha1
-                cmd "sha1sum -c #{sigfile}"
+                c "sha1sum -c #{sigfile}"
         end
     end
 
@@ -215,7 +264,7 @@ module Utils
     def unpack(filename, mode="xzf")
 		puts "解压 #{filename}...".green.bold
 
-		cmd "tar #{mode} #{filename}"
+		c "tar #{mode} #{filename}"
     end
 
 #----------------------------------

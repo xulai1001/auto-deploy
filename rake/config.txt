@@ -3,7 +3,7 @@
 
 require "pp"
 
-env = {
+config = {
     fedora: {
         grubdir: "/boot/grub2",
         grubcfg_cmd: "grub2-mkconfig",
