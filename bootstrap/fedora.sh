@@ -29,9 +29,12 @@ set_ruby()
 
 download()
 {
+    cd ~
+    rm -rf .autodep
     mkdir ~/.autodep
     cd ~/.autodep
     echo "进入目录" `pwd`
+
     git clone https://github.com/xulai1001/auto-deploy .
     cd -
 }

@@ -18,7 +18,7 @@ class MyTask
 
     def package
         puts "安装#{self.class}的依赖包...".green
-        Utils.distro.install_package PACKAGES
+        Utils.distro.install_package self.class::PACKAGES
     end
     
     # 下载源码，放在src文件夹中
