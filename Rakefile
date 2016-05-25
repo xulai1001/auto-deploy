@@ -3,6 +3,8 @@ require "term/ansicolor"
 require "require_all"
 require_rel "rake/*.rb"
 
+$dry ||= 0
+
 include Utils
 
 Rake::TaskManager.record_task_metadata = true
@@ -33,9 +35,7 @@ $app_list.each do |k|
             end
         end
         task :help do
-            $dry = true
-            k.instance.help
-            $dry = false
+            Utils.dry_run { k.instance.help }
         end
     end
     mytask tag(k) do

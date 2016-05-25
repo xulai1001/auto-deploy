@@ -1,6 +1,12 @@
 #encoding:utf-8
 require "term/ansicolor"
 
+$dry ||= 0
+def dry?
+    return $dry > 0 rescue false
+end
+
+
 class String
     include Term::ANSIColor
 end
@@ -18,7 +24,7 @@ class Dir
             if block
                 @@cdstack.push str
                 puts "[#{@@cdstack.size}] 进入目录 #{str}".blue.bold
-                if !$dry
+                if not dry?
                     old_chdir str, &block
                 else
                     yield block
@@ -28,7 +34,7 @@ class Dir
             else
                 puts "[#{@@cdstack.size}] 更改目录 #{str}".blue.bold
                 @@cdstack[-1] = str
-                old_chdir str if !$dry
+                old_chdir str if not dry?
             end
         end
     end
@@ -58,7 +64,7 @@ module Utils
     def must_root
         if !root?
             puts "操作需要root权限，请使用sudo rake".red.bold
-            raise if not $dry
+            raise if not dry?
         end
         true
     end
@@ -66,13 +72,13 @@ module Utils
     def must_not_root
         if logname == "root"
             puts "操作无法在root用户(su)下执行，请使用sudo".red.bold
-            raise if not $dry
+            raise if not dry?
         end
         true
     end
 
     def pass_if_dry
-        if $dry
+        if dry?
             puts "模拟执行中,跳过部分操作."
         else
             yield
@@ -93,10 +99,10 @@ module Utils
     #                cmdline = "su -c '" + c + "' - #{logname}"
                     cmdline = "su -c '" + c + "' #{logname}"
                     puts cmdline.blue.bold
-                    ret = system cmdline if !$dry
+                    ret = system cmdline if !dry?
                 else
                     puts c.blue.bold
-                    if !$dry
+                    if !dry?
                         system c
                         raise "#{cmdline} -> #{$?}".red.bold if !$?.success?
                     end
@@ -111,11 +117,11 @@ module Utils
             c.tr! "\n", ""
             if root?
                 puts c.blue.bold
-                system c if !$dry
+                system c if !dry?
             else
                 cmdline = "sudo " + c
                 puts "[需要系统权限] #{cmdline}".blue.bold
-                if !$dry
+                if !dry?
                     system cmdline
                     raise "#{cmdline} -> #{$?}".red.bold if !$?.success?
                 end
@@ -144,6 +150,11 @@ module Utils
     
     def local_fname(url); return url[/\/[^\/]*$/][1..-1]; end
     
+    def edit_config(fname)
+        puts "手动编辑 #{fname}...".blue.bold
+        confirm_and_run { c "gedit #{fname}" }
+    end
+    
     # insert text before/after first matched line
     # search by lines
     def insert_config(fname, tag=:before, pattern="", text="")
@@ -163,8 +174,7 @@ module Utils
             end
         else
             puts "在文件 #{fname} 中未找到指定模式: #{pattern}".red.bold
-            puts "是否要手动编辑?"
-            confirm_and_run { c "gedit #{fname}" }
+            edit_config fname
         end
     end
     
@@ -191,7 +201,7 @@ module Utils
     def distro_module(mod); @distro_module[mod::ID] = mod; end
     
     # get current distro
-    def distro; @distro_module[distro_info["id"]]; end
+    def distro; @distro_module[distro_info["id"].to_sym]; end
 
 #----------------------------------
 # confirm helper
@@ -201,19 +211,25 @@ module Utils
     end
     
     def dry_run(*args)
-        $dry = true
+        $dry ||= 0
+        $dry += 1
         yield *args
-        $dry = false
+        $dry -= 1
     end
     
     def confirm
-        STDOUT.write "输入任意键执行，S - 跳过本步骤, N/X - 中止操作："; s = STDIN.gets.chomp
-        case s.downcase
-            when "s"
-                return "skip"
-            when "x", "n"
-                return "cancel"
-            else return true
+        if dry?
+            puts "操作需要用户确认.".yellow.bold
+            return true
+        else
+            STDOUT.write "输入任意键执行，S - 跳过本步骤, N/X - 中止操作："; s = STDIN.gets.chomp
+            case s.downcase
+                when "s"
+                    return "skip"
+                when "x", "n"
+                    return "cancel"
+                else return true
+            end
         end
     end
     
@@ -221,7 +237,7 @@ module Utils
         dry_run *args, &block
         case confirm
             when true   # run
-                return block.call t, *a
+                return block.call *args
             when "skip"
                 puts "跳过本步骤.".yellow.bold
                 return "skip"

@@ -10,20 +10,15 @@ class MyTask
     include Singleton
     # apt-get 下载依赖软件包，需要管理权限
     
-    PACKAGES = ""
-    FEDORA_PACKAGES = ""
+    PACKAGES = {
+        :ubuntu => "",
+        :fedora => ""
+    }
     ALL = [:package, :source, :compile, :install]
 
     def package
-        installer = "apt-get"
-        pkg = self.class::PACKAGES
-        if Utils.distro_info["id"] == "fedora"
-            # currently fedora only, others debian
-            installer = "dnf"
-            pkg = self.class::FEDORA_PACKAGES
-        end
         puts "安装#{self.class}的依赖包...".green
-        Utils.cmdsu "#{installer} install #{pkg}"
+        Utils.distro.install_package PACKAGES
     end
     
     # 下载源码，放在src文件夹中
@@ -44,7 +39,7 @@ class MyTask
 
     def help
         puts [self.class, "动作："].join("\n")
-        (self.methods - Object.methods - [:_dump, :help, :all]).each do |sym|
+        self.class::ALL.each do |sym|
             puts "------------ rake #{self.class}:#{sym} -----------".yellow.bold
             send sym
         end
@@ -52,7 +47,7 @@ class MyTask
     
     # 进行所有操作
     def all
-        if $dry or (not ["true", "1"].include? ENV["step"])
+        if dry? or (not ["true", "1"].include? ENV["step"])
             self.class::ALL.each {|op| self.send op }                
         else
             self.class::ALL.each {|op| Utils.confirm_and_run { self.send op } }

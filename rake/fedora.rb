@@ -7,7 +7,7 @@ module Fedora
     extend Utils
     
     # register to utils
-    ID = "fedora"
+    ID = :fedora
     Utils.distro_module self
 
     GRUB_PATH = "/boot/grub2"
@@ -16,12 +16,13 @@ module Fedora
   
     module_function
     def update_grub
+        puts "重新生成grub设置 ...".green.bold
         cs "#{GRUB_CMD} -o #{GRUB_CFG}"
-        puts "编辑grub.cfg ..."
-        cs "gedit #{GRUB_CFG}"
+        edit_config GRUB_CFG
     end
 
     def update_ramdisk
+        puts "更新initrd ..."
         cs "dracut --force"
     end
 
@@ -56,12 +57,17 @@ EOL
 
     def add_to_rclocal(str)
         must_root
+        setup_rclocal
         puts "添加启动项: #{str}"
         
         pass_if_dry do
             insert_config "/etc/rc.d/rc.local", :before, /^exit 0/, str
         end
-    end 
+    end
+    
+    def install_package(packages)
+        cs "dnf install #{packages[ID]}" 
+    end
 
 end
 
