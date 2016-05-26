@@ -30,17 +30,21 @@ set_ruby()
 download()
 {
     cd ~
-    rm -rf .autodep
-    mkdir ~/.autodep
-    cd ~/.autodep
-    echo "进入目录" `pwd`
-
-    git clone https://github.com/xulai1001/auto-deploy .
+    if [ -d .autodep ]; then
+        cd .autodep
+        git pull
+    else
+        rm -rf .autodep
+        mkdir ~/.autodep
+        cd ~/.autodep
+        echo "进入目录" `pwd`
+        git clone https://github.com/xulai1001/auto-deploy .
+    fi
     cd -
 }
 
 confirm "设置软件源 /etc/yum.repos.d/"
-if [ $? -eq 0 ]; then set-repo; fi
+if [ $? -eq 0 ]; then set_repo; fi
 
 echo "安装基础依赖包"
 confirm_and_run "sudo dnf install \"@Development Tools\" ruby"
@@ -54,3 +58,6 @@ if [ $? -eq 0 ]; then set_ruby; fi
 confirm "下载auto-deploy..."
 if [ $? -eq 0 ]; then download; fi
 
+cd ~/.autodep
+mkdir packages src
+echo "auto-deploy 已经安装在 ~/.autodep. gg gl!"

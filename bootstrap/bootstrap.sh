@@ -61,6 +61,7 @@ install()
 {
     mkdir /tmp/autodep
     cd /tmp/autodep
+    rm -f *
     echo "进入目录" `pwd`
     echo "检测Linux版本..."
     # Linux distrib detection
