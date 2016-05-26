@@ -11,7 +11,7 @@ class Xen < MyTask
 python-dev gcc-multilib bin86 iasl bcc uuid-dev ncurses-dev libglib2.0-dev libaio-dev liblzma-dev libssl-dev libyajl-dev seabios libpixman-1-dev libtool zlib1g-dev texinfo
 """,
     :fedora => """
-python-devel acpica-tools uuid-devel ncurses-devel glib2-devel libaio-devel yajl-devel seabios-bin pixman-devel libtool zlib-devel lzma-sdk-devel texinfo bridge-utils gcc-c++ pcre-devel dev86 glibc-devel.i686 libgcc.i686 SDL-devel libgnomeui-devel xen-devel
+python-devel acpica-tools uuid-devel ncurses-devel glib2-devel libaio-devel yajl-devel seabios-bin pixman-devel libtool zlib-devel lzma-sdk-devel texinfo bridge-utils gcc-c++ pcre-devel dev86 glibc-devel.i686 libgcc.i686 SDL-devel libgnomeui-devel xen-devel patch
 """
     }
     
@@ -40,21 +40,27 @@ EOL
             retry
         end
         end
+        
+        Dir.chdir "src" do
+            puts "解压至 src/#{PKGNAME} ...".green.bold
+            unpack "../packages/#{PKGNAME}.tar.gz"
+            
+            # patch
+            puts "应用补丁 misc/block-log.patch ...".green.bold
+            c "patch -d #{PKGNAME} -p1 < ../misc/block-log.patch"
+        end
+            
     end
     
     # 配置源码并编译
     def compile
         super
-        Dir.chdir "src" do
-            unpack "../packages/#{PKGNAME}.tar.gz"
-
-            Dir.chdir PKGNAME do
-                puts "编译xen...".green.bold
-                cmd "./configure #{CONFIG.tr("\n", "")}",
-                    "make -j8 xen",
-                    "make -j8 tools",
-                    "make -j8 stubdom"
-            end
+        Dir.chdir "src/#{PKGNAME}" do
+            puts "编译xen...".green.bold
+            cmd "./configure #{CONFIG.tr("\n", "")}",
+                "make -j8 xen",
+                "make -j8 tools",
+                "make -j8 stubdom"
         end
     end
     
@@ -71,12 +77,14 @@ EOL
             Utils.distro.update_grub
             Utils.distro.update_ramdisk
             puts "添加运行库引用 ...".green.bold
+            cmdsu "echo /usr/local/lib > /etc/ld.so.conf.d/local.conf"
             cmdsu "ldconfig"
         end
         
         Dir.chdir "/etc" do
             puts "设置xencommons启动项".green.bold
             Utils.distro.add_to_rclocal "service xencommons start"
+           # Utils.distro.add_to_rclocal "export PATH=$PATH:/usr/local/sbin"
         end
         puts "Xen安装完成，需要重新启动......".green.bold
 

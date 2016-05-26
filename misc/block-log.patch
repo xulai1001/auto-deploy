@@ -1,0 +1,118 @@
+--- a/tools/blktap2/drivers/block-log.c
++++ b/tools/blktap2/drivers/block-log.c
+@@ -54,8 +54,6 @@
+ #include "tapdisk-driver.h"
+ #include "tapdisk-interface.h"
+ 
+-#define MAX_CONNECTIONS 1
+-
+ typedef struct poll_fd {
+   int          fd;
+   event_id_t   id;
+@@ -69,8 +67,7 @@ struct tdlog_state {
+   char*        ctlpath;
+   poll_fd_t    ctl;
+ 
+-  int          connected;
+-  poll_fd_t    connections[MAX_CONNECTIONS];
++  poll_fd_t    connection;
+ 
+   char*        shmpath;
+   void*        shm;
+@@ -305,7 +302,7 @@ static int ctl_open(struct tdlog_state* s, const char* name)
+   s->ctl.id = tapdisk_server_register_event(SCHEDULER_POLL_READ_FD,
+                                            s->ctl.fd, 0, ctl_accept, s);
+   if (s->ctl.id < 0) {
+-    BWPRINTF("error register event handler: %s", strerror(s->ctl.id));
++    BWPRINTF("error register event handler: %s", strerror(errno));
+     goto err_sock;
+   }
+ 
+@@ -323,12 +320,11 @@ static int ctl_open(struct tdlog_state* s, const char* name)
+ 
+ static int ctl_close(struct tdlog_state* s)
+ {
+-  while (s->connected) {
+-    s->connected--;
+-    tapdisk_server_unregister_event(s->connections[s->connected].id);
+-    close(s->connections[s->connected].fd);
+-    s->connections[s->connected].fd = -1;
+-    s->connections[s->connected].id = 0;
++  if (s->connection.fd >= 0) {
++    tapdisk_server_unregister_event(s->connection.id);
++    close(s->connection.fd);
++    s->connection.fd = -1;
++    s->connection.id = 0;
+   }
+ 
+   if (s->ctl.fd >= 0) {
+@@ -359,15 +355,12 @@ static int ctl_close_sock(struct tdlog_state* s, int fd)
+ {
+   int i;
+ 
+-  for (i = 0; i < s->connected; i++) {
+-    if (s->connections[i].fd == fd) {
+-      tapdisk_server_unregister_event(s->connections[i].id);
+-      close(s->connections[i].fd);
+-      s->connections[i].fd = -1;
+-      s->connections[i].id = 0;
+-      s->connected--;
+-      return 0;
+-    }
++  if (fd >= 0 && s->connection.fd == fd) {
++    tapdisk_server_unregister_event(s->connection.id);
++    close(s->connection.fd);
++    s->connection.fd = -1;
++    s->connection.id = 0;
++    return 0;
+   }
+ 
+   BWPRINTF("requested to close unknown socket %d", fd);
+@@ -385,7 +378,7 @@ static void ctl_accept(event_id_t id, char mode, void *private)
+     return;
+   }
+ 
+-  if (s->connected) {
++  if (s->connection.fd >= 0) {
+     BWPRINTF("control session in progress, closing new connection");
+     close(fd);
+     return;
+@@ -394,14 +387,13 @@ static void ctl_accept(event_id_t id, char mode, void *private)
+   cid = tapdisk_server_register_event(SCHEDULER_POLL_READ_FD,
+                                      fd, 0, ctl_request, s);
+   if (cid < 0) {
+-    BWPRINTF("error registering connection event handler: %s", strerror(cid));
++    BWPRINTF("error registering connection event handler: %s", strerror(errno));
+     close(fd);
+     return;
+   }
+ 
+-  s->connections[s->connected].fd = fd;
+-  s->connections[s->connected].id = cid;
+-  s->connected++;
++  s->connection.fd = fd;
++  s->connection.id = cid;
+ }
+ 
+ /* response format: 4 bytes shmsize, 0-terminated path */
+@@ -545,9 +537,8 @@ static inline int ctl_find_connection(struct tdlog_state *s, event_id_t id)
+ {
+   int i;
+ 
+-  for (i = 0; i < s->connected; i++)
+-    if (s->connections[i].id == id)
+-      return s->connections[i].fd;
++  if (s->connection.fd >= 0 && s->connection.id == id)
++      return s->connection.fd;
+ 
+   BWPRINTF("unrecognized event callback id %d", id);
+   return -1;
+@@ -593,6 +584,8 @@ static int tdlog_open(td_driver_t* driver, const char* name, td_flag_t flags)
+   memset(s, 0, sizeof(*s));
+ 
+   s->size = driver->info.size;
++  s->connection.fd = -1;
++  s->ctl.fd = -1;
+ 
+   if ((rc = writelog_create(s))) {
+     tdlog_close(driver);

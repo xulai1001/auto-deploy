@@ -160,6 +160,10 @@ module Utils
     def insert_config(fname, tag=:before, pattern="", text="")
         text = yield if block_given?
         lines = File.read(fname).lines
+        if lines.index {|l| l[text]}
+            puts "文件中已经有指定行, 跳过操作.".yellow.bold
+            return
+        end
         id = lines.index {|l| l[pattern]}
         if id
             if tag == :before

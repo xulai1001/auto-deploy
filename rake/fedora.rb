@@ -18,7 +18,7 @@ module Fedora
     def update_grub
         puts "重新生成grub设置 ...".green.bold
         cs "#{GRUB_CMD} -o #{GRUB_CFG}"
-        edit_config GRUB_CFG
+        with_cmdsu { edit_config GRUB_CFG }
     end
 
     def update_ramdisk
@@ -35,6 +35,7 @@ module Fedora
                 if not FileTest.exists? "rc.local"
                     File.open "rc.local", "w+" do |f|
                         f.puts "#!/bin/bash"
+                        f.puts "exit 0"
                     end
                     cs "chmod +x rc.local"
                 end
@@ -61,7 +62,7 @@ EOL
         puts "添加启动项: #{str}"
         
         pass_if_dry do
-            insert_config "/etc/rc.d/rc.local", :before, /^exit 0/, str
+            with_cmdsu { insert_config "/etc/rc.d/rc.local", :before, /^exit 0/, str }
         end
     end
     
