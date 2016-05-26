@@ -78,6 +78,11 @@ install()
             . fedora.sh
         fi
     fi
+    cd ~/.autodep
 }
 
-$1
+if [ ! $1 ]; then
+    echo "使用 ./bootstrap.sh install 进行安装."
+else
+    $1
+fi

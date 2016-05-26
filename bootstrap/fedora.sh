@@ -59,5 +59,5 @@ confirm "下载auto-deploy..."
 if [ $? -eq 0 ]; then download; fi
 
 cd ~/.autodep
-mkdir packages src
-echo "auto-deploy 已经安装在 ~/.autodep. gg gl!"
+if [ ! -d packages ]; then mkdir packages src; fi
+echo "auto-deploy 已经安装在 ~/.autodep. 进入该目录进行后续操作. gg gl!"
