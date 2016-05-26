@@ -144,7 +144,7 @@ module Utils
 
     def exists?(fname)
         ret = FileTest.exists? fname
-        p "文件 #{fname} 已存在." if ret
+        puts "文件 #{fname} 已存在." if ret
         ret
     end
     

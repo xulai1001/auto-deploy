@@ -11,7 +11,7 @@ class Xen < MyTask
 python-dev gcc-multilib bin86 iasl bcc uuid-dev ncurses-dev libglib2.0-dev libaio-dev liblzma-dev libssl-dev libyajl-dev seabios libpixman-1-dev libtool zlib1g-dev texinfo
 """,
     :fedora => """
-python-devel acpica-tools uuid-devel ncurses-devel glib2-devel libaio-devel yajl-devel seabios-bin pixman-devel libtool zlib-devel lzma-sdk-devel texinfo
+python-devel acpica-tools uuid-devel ncurses-devel glib2-devel libaio-devel yajl-devel seabios-bin pixman-devel libtool zlib-devel lzma-sdk-devel texinfo bridge-utils gcc-c++ pcre-devel dev86 glibc-devel.i686 libgcc.i686 SDL-devel libgnomeui-devel xen-devel
 """
     }
     
