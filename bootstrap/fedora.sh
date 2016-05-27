@@ -58,6 +58,10 @@ if [ $? -eq 0 ]; then set_ruby; fi
 confirm "下载auto-deploy..."
 if [ $? -eq 0 ]; then download; fi
 
+# misc operations
+sudo systemctl enable sshd.service
+confirm_and_run sudo dnf install tigervnc-server
+
 cd ~/.autodep
 if [ ! -d packages ]; then mkdir packages src; fi
 echo "auto-deploy 已经安装在 ~/.autodep. 进入该目录进行后续操作. gg gl!"
