@@ -85,6 +85,10 @@ EOL
             puts "设置xencommons启动项".green.bold
             Utils.distro.add_to_rclocal "service xencommons start"
            # Utils.distro.add_to_rclocal "export PATH=$PATH:/usr/local/sbin"
+            if Utils.distro::ID == :fedora
+                puts "将/usr/local/sbin 加入/etc/sudoers 的secure_path中（手动）".yellow.bold
+                cs "visudo"
+            end
         end
         puts "Xen安装完成，需要重新启动......".green.bold
 
