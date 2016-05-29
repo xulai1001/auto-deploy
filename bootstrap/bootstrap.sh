@@ -41,6 +41,15 @@ confirm_and_run()
     if [ $res -eq 0 ]; then eval $*; fi
 }
 
+keep_trying()
+{
+    $*
+    while [ $? -ne 0 ]; do
+        echo "--- retrying --- "
+        $*
+    done
+}
+
 # unit test
 check_bootstrap()
 {

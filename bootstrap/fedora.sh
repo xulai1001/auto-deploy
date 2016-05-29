@@ -40,23 +40,29 @@ download()
         echo "进入目录" `pwd`
         git clone https://github.com/xulai1001/auto-deploy .
     fi
-    cd -
+#    cd -
 }
 
 confirm "设置软件源 /etc/yum.repos.d/"
 if [ $? -eq 0 ]; then set_repo; fi
 
-echo "安装基础依赖包"
-confirm_and_run "sudo dnf install \"@Development Tools\" ruby"
+confirm "安装基础依赖包"
+if [ $? -eq 0 ]; then 
+    # keep trying
+    sudo dnf install "@Development Tools" ruby
+    while [ $? -ne 0 ]; do
+        sudo dnf install "@Development Tools" ruby
+    done
+fi
 
-echo "更新系统"
-confirm_and_run sudo dnf update
+confirm "更新系统"
+if [ $? -eq 0 ]; then keep_trying "sudo dnf update"; fi
 
 confirm "设置ruby软件源"
 if [ $? -eq 0 ]; then set_ruby; fi
 
 confirm "下载auto-deploy..."
-if [ $? -eq 0 ]; then download; fi
+if [ $? -eq 0 ]; then keep_trying download; fi
 
 # misc operations
 sudo systemctl enable sshd.service
