@@ -39,6 +39,10 @@ download()
         cd ~/.autodep
         echo "进入目录" `pwd`
         git clone https://github.com/xulai1001/auto-deploy .
+        while [ $? -ne 0 ]; do
+            rm -rf *
+            git clone https://github.com/xulai1001/auto-deploy .
+        done
     fi
 #    cd -
 }
