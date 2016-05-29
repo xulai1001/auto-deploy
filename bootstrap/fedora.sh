@@ -53,9 +53,9 @@ if [ $? -eq 0 ]; then set_repo; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    sudo dnf install -y "@Development Tools" ruby
+    sudo dnf install -y "@Development Tools" ruby tigervnc-server vim
     while [ $? -ne 0 ]; do
-        sudo dnf install -y "@Development Tools" ruby
+        sudo dnf install -y "@Development Tools" ruby tigervnc-server vim
     done
 fi
 
@@ -70,7 +70,6 @@ if [ $? -eq 0 ]; then keep_trying download; fi
 
 # misc operations
 sudo systemctl enable sshd.service
-confirm_and_run sudo dnf -y install tigervnc-server vim
 
 cd ~/.autodep
 if [ ! -d packages ]; then mkdir packages src; fi
