@@ -70,7 +70,7 @@ if [ $? -eq 0 ]; then keep_trying download; fi
 
 # misc operations
 sudo systemctl enable sshd.service
-confirm_and_run sudo dnf install tigervnc-server
+confirm_and_run sudo dnf -y install tigervnc-server vim
 
 cd ~/.autodep
 if [ ! -d packages ]; then mkdir packages src; fi
