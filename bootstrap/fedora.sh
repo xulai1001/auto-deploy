@@ -49,9 +49,9 @@ if [ $? -eq 0 ]; then set_repo; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    sudo dnf install "@Development Tools" ruby
+    sudo dnf install -y "@Development Tools" ruby
     while [ $? -ne 0 ]; do
-        sudo dnf install "@Development Tools" ruby
+        sudo dnf install -y "@Development Tools" ruby
     done
 fi
 
