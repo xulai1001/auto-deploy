@@ -65,6 +65,12 @@ utest()
     to_lower Ab123BA
     confirm_and_run ls -l /var/run
 }
+
+distro()
+{
+    cat /etc/os-release | sed -nr s/^ID=\(.*\)/\\1/p
+}
+
 # install script
 install()
 {
@@ -72,21 +78,16 @@ install()
     cd /tmp/autodep
     rm -f *
     echo "进入目录" `pwd`
-    echo "检测Linux版本..."
     # Linux distrib detection
-    if [ -f /etc/redhat-release ]; then
-        # redhat
-        rh_release=`cat /etc/redhat-release`
-        echo "检测到redhat: " $rh_release
-        if [[ $rh_release == Fedora* ]]; then
-            # fedora
-            echo "检测到 Fedora 发行版, 使用fedora.sh ..."
-            wget $wget_args ${raw_url}/bootstrap/fedora.sh
-            chmod 777 fedora.sh
-            echo "----"
-            . fedora.sh
-        fi
-    fi
+    dist=`distro`
+    echo "检测Linux版本..." $dist
+    
+    fname=${dist}.sh
+    echo "使用${fname} ..."
+    wget $wget_args ${raw_url}/bootstrap/${fname}
+    chmod 777 $fname
+    echo "----"
+    . $fname
     cd ~/.autodep
 }
 
