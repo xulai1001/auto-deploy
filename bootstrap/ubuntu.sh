@@ -52,7 +52,7 @@ if [ $? -eq 0 ]; then set_repo; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    packages="vim git openssh-server ruby python-pip"
+    packages="vim git openssh-server ruby python-pip tightvncserver"
 
     sudo apt-get install -y $packages
     while [ $? -ne 0 ]; do
