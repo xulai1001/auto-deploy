@@ -39,7 +39,9 @@ class MyTask
 
     def help
         puts [self.class, "动作："].join("\n")
-        self.class::ALL.each do |sym|
+        h = self.class::ALL
+        h = self.class::HELP if self.class.const_defined? :HELP
+        h.each do |sym|
             puts "------------ rake #{self.class}:#{sym} -----------".yellow.bold
             send sym
         end

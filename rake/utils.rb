@@ -185,6 +185,7 @@ module Utils
     def append_config(fname, text)
         text = yield if block_given?
         File.open fname, "a" do |f|
+            f.puts "# modified by auto-deploy"
             f.puts text.chomp
         end
     end
