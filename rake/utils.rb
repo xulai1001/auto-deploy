@@ -158,6 +158,7 @@ module Utils
     # insert text before/after first matched line
     # search by lines
     def insert_config(fname, tag=:before, pattern="", text="")
+        puts "修改配置文件 #{fname}".blue.bold
         text = yield if block_given?
         lines = File.read(fname).lines
         if lines.index {|l| l[text]}
@@ -183,6 +184,7 @@ module Utils
     end
     
     def append_config(fname, text)
+        puts "修改配置文件 #{fname}".blue.bold
         text = yield if block_given?
         File.open fname, "a" do |f|
             f.puts "# modified by auto-deploy"
