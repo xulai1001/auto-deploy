@@ -11,7 +11,7 @@ set_repo()
     echo "设置ubuntu软件源(hust)..."
     wget http://codepad.org/ZnBWV1kO/raw.txt -O ubuntu.repo
     sudo cp ubuntu.repo /etc/apt/sources.list
-    sudo apt-get update
+    sudo apt-get -y update
 }
 
 set_ruby()
@@ -61,7 +61,7 @@ if [ $? -eq 0 ]; then
 fi
 
 confirm "更新系统"
-if [ $? -eq 0 ]; then keep_trying "sudo apt-get upgrade"; fi
+if [ $? -eq 0 ]; then keep_trying "sudo apt-get -y upgrade"; fi
 
 confirm "设置ruby软件源"
 if [ $? -eq 0 ]; then set_ruby; fi
