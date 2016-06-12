@@ -53,14 +53,12 @@ if [ $? -eq 0 ]; then set_repo; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    sudo dnf install -y "@Development Tools" ruby tigervnc-server vim
+    packages="\"@Development Tools\" \"@xfce\" ruby tigervnc-server vim"
+    sudo dnf install -y $packages
     while [ $? -ne 0 ]; do
-        sudo dnf install -y "@Development Tools" ruby tigervnc-server vim
+        sudo dnf install -y $packages
     done
 fi
-
-confirm "更新系统"
-if [ $? -eq 0 ]; then keep_trying "sudo dnf update"; fi
 
 confirm "设置ruby软件源"
 if [ $? -eq 0 ]; then set_ruby; fi
@@ -74,3 +72,6 @@ sudo systemctl enable sshd.service
 cd ~/.autodep
 if [ ! -d packages ]; then mkdir packages src; fi
 echo "auto-deploy 已经安装在 ~/.autodep. 进入该目录进行后续操作. gg gl!"
+
+confirm "是否要更新系统?"
+if [ $? -eq 0 ]; then keep_trying "sudo dnf update -y"; fi

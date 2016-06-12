@@ -52,16 +52,14 @@ if [ $? -eq 0 ]; then set_repo; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    packages="vim git openssh-server ruby python-pip tightvncserver"
+    packages="vim git openssh-server ruby python-pip tightvncserver xfce4 xrdp"
 
     sudo apt-get install -y $packages
     while [ $? -ne 0 ]; do
         sudo apt-get install -y $packages
     done
+    echo "xfce4-session" > ~/.xsession
 fi
-
-confirm "更新系统"
-if [ $? -eq 0 ]; then keep_trying "sudo apt-get -y upgrade"; fi
 
 confirm "设置ruby软件源"
 if [ $? -eq 0 ]; then set_ruby; fi
@@ -74,3 +72,7 @@ if [ $? -eq 0 ]; then keep_trying download; fi
 cd ~/.autodep
 if [ ! -d packages ]; then mkdir packages src; fi
 echo "auto-deploy 已经安装在 ~/.autodep. 进入该目录进行后续操作. gg gl!"
+
+confirm "是否更新系统?"
+if [ $? -eq 0 ]; then keep_trying "sudo apt-get -y upgrade"; fi
+
