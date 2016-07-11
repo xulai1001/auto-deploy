@@ -9,7 +9,7 @@ fi
 set_repo()
 {
     echo "设置ubuntu软件源(hust)..."
-    wget http://codepad.org/ZnBWV1kO/raw.txt -O ubuntu.repo
+    wget http://codepad.org/5AQht1md/raw.txt -O ubuntu.repo
     sudo cp ubuntu.repo /etc/apt/sources.list
     sudo apt-get -y update
 }
