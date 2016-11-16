@@ -9,16 +9,16 @@ fi
 set_repo()
 {
     echo "设置ubuntu软件源(hust)..."
-    wget http://codepad.org/5AQht1md/raw.txt -O ubuntu.repo
+    wget http://codepad.org/UmhPqlty/raw.txt -O ubuntu.repo
     sudo cp ubuntu.repo /etc/apt/sources.list
     sudo apt-get -y update
 }
 
 set_ruby()
 {
-    # use rvm to install from ruby.taobao.org
+    # use rvm to install from ruby-china
     # fixme: need sudo or not?
-    sudo gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
+    sudo gem sources --add https://gems.ruby-china.org/ --remove https://rubygems.org/
     sudo gem sources -l
     sudo gem install require_all term-ansicolor
 
@@ -52,13 +52,13 @@ if [ $? -eq 0 ]; then set_repo; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    packages="vim git openssh-server ruby python-pip tightvncserver xfce4 xrdp"
+    packages="vim git openssh-server ruby python-pip tightvncserver xrdp"
 
     sudo apt-get install -y $packages
     while [ $? -ne 0 ]; do
         sudo apt-get install -y $packages
     done
-    echo "xfce4-session" > ~/.xsession
+#    echo "xfce4-session" > ~/.xsession
 fi
 
 confirm "设置ruby软件源"
