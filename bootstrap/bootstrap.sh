@@ -71,6 +71,11 @@ distro()
     cat /etc/os-release | sed -nr s/^ID=\(.*\)/\\1/p
 }
 
+version_id()
+{
+    cat /etc/os-release | sed -nr s/^VERSION_ID=\(.*\)/\\1/p
+}
+
 # install script
 install()
 {
@@ -80,14 +85,15 @@ install()
     echo "进入目录" `pwd`
     # Linux distrib detection
     dist=`distro`
-    echo "检测Linux版本..." $dist
+    ver=`version_id`
+    echo "检测Linux版本..." $dist $ver
     
     fname=${dist}.sh
     echo "使用${fname} ..."
     wget $wget_args ${raw_url}/bootstrap/${fname}
     chmod 777 $fname
     echo "----"
-    . $fname
+    . $fname $ver
     cd ~/.autodep
 }
 

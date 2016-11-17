@@ -8,9 +8,13 @@ fi
 
 set_repo()
 {
-    echo "设置ubuntu软件源(hust)..."
-    wget http://codepad.org/SHpOKtlh/raw.txt -O ubuntu.repo
+    url="mirrors.aliyun.com"
+    ver="xenial"
+    echo "设置ubuntu软件源..." $1
+    wget http://raw.githubusercontent.com/xulai1001/auto-deploy/master1/bootstrap/ubuntu-template.repo -O ubuntu.repo
+    sed -ie "s/{url}/${url}/;s/{version}/${ver}/" ubuntu.repo
     sudo cp ubuntu.repo /etc/apt/sources.list
+    cat /etc/apt/sources.list
     sudo apt-get -y update
 }
 
@@ -47,7 +51,7 @@ download()
 }
 
 confirm "设置软件源"
-if [ $? -eq 0 ]; then set_repo; fi
+if [ $? -eq 0 ]; then set_repo $1; fi
 
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
