@@ -1,10 +1,10 @@
-deb mirror://mirrors.163.com/ubuntu/mirrors.txt {version} main restricted universe multiverse
-deb mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-security main restricted universe multiverse
-deb mirror://mirrors.163.com/ubuntu/mirrors.txt restricted universe multiverse
-deb mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-proposed main restricted universe multiverse
-deb mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-backports main restricted universe multiverse
-deb-src mirror://mirrors.163.com/ubuntu/mirrors.txt {version} main restricted universe multiverse
-deb-src mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-security main restricted universe multiverse
-deb-src mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-updates main restricted universe multiverse
-deb-src mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-proposed main restricted universe multiverse
-deb-src mirror://mirrors.163.com/ubuntu/mirrors.txt {version}-backports main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu {version} main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu {version}-security main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu restricted universe multiverse
+deb http://mirrors.163.com/ubuntu {version}-proposed main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu {version}-backports main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu {version} main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu {version}-security main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu {version}-updates main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu {version}-proposed main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu {version}-backports main restricted universe multiverse
