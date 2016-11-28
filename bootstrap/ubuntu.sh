@@ -9,10 +9,15 @@ fi
 set_repo()
 {
     url="mirrors.aliyun.com"
-    ver="xenial"
-    echo "设置ubuntu软件源..." $1
+    if [ $1 = "16.04" ]; then
+        ver="xenial"
+    else
+        if [ $1 = "14.04" ]; then ver="trusty"; fi
+    fi
+    echo "设置ubuntu软件源..." $1 $ver
     wget http://raw.githubusercontent.com/xulai1001/auto-deploy/master1/bootstrap/ubuntu-template.repo -O ubuntu.repo
-    sed -ie "s/{url}/${url}/;s/{version}/${ver}/" ubuntu.repo
+#    sed -ie "s/{url}/${url}/;s/{version}/${ver}/" ubuntu.repo
+    sed -ie "s/{version}/${ver}/" ubuntu.repo
     sudo cp ubuntu.repo /etc/apt/sources.list
     cat /etc/apt/sources.list
     sudo apt-get -y update
