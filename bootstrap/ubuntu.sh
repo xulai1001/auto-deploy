@@ -9,10 +9,10 @@ fi
 set_repo()
 {
     url="mirrors.aliyun.com"
-    if [ $1 = '"16.04"' ]; then
+    if [ $1x = '"16.04"x' ]; then
         ver="xenial"
     else
-        if [ $1 = '"14.04"' ]; then ver="trusty"; fi
+        if [ $1x = '"14.04"x' ]; then ver="trusty"; fi
     fi
     echo "设置ubuntu软件源..." $1 $ver
     wget http://raw.githubusercontent.com/xulai1001/auto-deploy/master1/bootstrap/ubuntu-template.repo -O ubuntu.repo
