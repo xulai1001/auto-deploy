@@ -55,13 +55,20 @@ download()
 #    cd -
 }
 
+copy_vimrc()
+{
+    echo "setting up vimrc..."
+    pushd ~/.autodep
+    cp misc/simple.vimrc ~/.vimrc
+}
+
 confirm "设置软件源"
 if [ $? -eq 0 ]; then set_repo $1; fi
 
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    packages="vim git openssh-server ruby python-pip tightvncserver xrdp bridge-utils ntp ntpdate"
+    packages="vim git openssh-server ruby python-pip tightvncserver xrdp bridge-utils ntp ntpdate debootstrap tcpdump traceroute"
 
     sudo apt-get install -y $packages
     while [ $? -ne 0 ]; do
@@ -81,6 +88,8 @@ if [ $? -eq 0 ]; then keep_trying download; fi
 cd ~/.autodep
 if [ ! -d packages ]; then mkdir packages src; fi
 echo "auto-deploy 已经安装在 ~/.autodep. 进入该目录进行后续操作. gg gl!"
+
+copy_vimrc
 
 confirm "是否更新系统?"
 if [ $? -eq 0 ]; then keep_trying "sudo apt-get -y upgrade"; fi
