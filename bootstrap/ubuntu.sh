@@ -68,13 +68,13 @@ if [ $? -eq 0 ]; then set_repo $1; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    packages="vim git openssh-server ruby python-pip tightvncserver xrdp bridge-utils ntp ntpdate debootstrap tcpdump traceroute"
+    packages="vim git openssh-server ruby python-pip tightvncserver xrdp bridge-utils ntp ntpdate debootstrap tcpdump traceroute system-config-lvm"
 
     sudo apt-get install -y $packages
     while [ $? -ne 0 ]; do
         sudo apt-get install -y $packages
     done
-#    echo "xfce4-session" > ~/.xsession
+    echo "xfce4-session" > ~/.xsession
 fi
 
 confirm "设置ruby软件源"
