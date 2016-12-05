@@ -16,8 +16,8 @@ set_repo()
     fi
     echo "设置ubuntu软件源..." $1 $ver
     wget http://raw.githubusercontent.com/xulai1001/auto-deploy/master1/bootstrap/ubuntu-template.repo -O ubuntu.repo
-#    sed -ie "s/{url}/${url}/;s/{version}/${ver}/" ubuntu.repo
-    sed -ie "s/{version}/${ver}/" ubuntu.repo
+    sed -ie "s/{url}/${url}/;s/{version}/${ver}/" ubuntu.repo
+#    sed -ie "s/{version}/${ver}/" ubuntu.repo
     sudo cp ubuntu.repo /etc/apt/sources.list
     cat /etc/apt/sources.list
     sudo apt-get -y update
@@ -68,7 +68,7 @@ if [ $? -eq 0 ]; then set_repo $1; fi
 confirm "安装基础依赖包"
 if [ $? -eq 0 ]; then 
     # keep trying
-    packages="vim git openssh-server ruby python-pip tightvncserver xrdp bridge-utils ntp ntpdate debootstrap tcpdump traceroute system-config-lvm"
+    packages="vim git openssh-server ruby python-pip tightvncserver xrdp bridge-utils ntp ntpdate debootstrap tcpdump traceroute system-config-lvm lrzsz"
 
     sudo apt-get install -y $packages
     while [ $? -ne 0 ]; do
