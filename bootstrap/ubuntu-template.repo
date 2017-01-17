@@ -1,6 +1,6 @@
 deb http://{url}/ubuntu/ {version} main restricted universe multiverse
 deb http://{url}/ubuntu/ {version}-security main restricted universe multiverse
-deb http://{url}/ubuntu/ restricted universe multiverse
+deb http://{url}/ubuntu/ {version}-restricted universe multiverse
 deb http://{url}/ubuntu/ {version}-proposed main restricted universe multiverse
 deb http://{url}/ubuntu/ {version}-backports main restricted universe multiverse
 deb-src http://{url}/ubuntu/ {version} main restricted universe multiverse
@@ -8,3 +8,5 @@ deb-src http://{url}/ubuntu/ {version}-security main restricted universe multive
 deb-src http://{url}/ubuntu/ {version}-updates main restricted universe multiverse
 deb-src http://{url}/ubuntu/ {version}-proposed main restricted universe multiverse
 deb-src http://{url}/ubuntu/ {version}-backports main restricted universe multiverse
+
+
