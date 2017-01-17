@@ -8,7 +8,7 @@ fi
 
 set_repo()
 {
-    url="mirrors.aliyun.com"
+    url="mirrors.ustc.edu.cn"
     if [ $1x = '"16.04"x' ]; then
         ver="xenial"
     else
